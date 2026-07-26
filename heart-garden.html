@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heart Garden</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1f1118 0%, #2d1422 50%, #1c0a13 100%);
+      color: #f7e6ee;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      max-width: 720px;
+      width: 100%;
+      background: rgba(255, 143, 163, 0.08);
+      border: 1px solid rgba(255, 182, 193, 0.3);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #ffb3c1;
+    }
+
+    .note {
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    a {
+      color: #ffb3c1;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Heart Garden</h1>
+    <p>These are the affirmations gathered for this garden.</p>
+    <div id="affirmations"></div>
+    <p><a href="index.html">← Back to the main garden</a></p>
+  </div>
+
+  <script>
+    async function loadAffirmations() {
+      const res = await fetch('/api/garden', { cache: 'no-store' });
+      if (!res.ok) throw new Error('bad-status');
+      const data = await res.json();
+      const items = Array.isArray(data.garden) ? data.garden : [];
+      const affirmations = items.filter(item => item.type === 'affirmation');
+      const container = document.getElementById('affirmations');
+      container.innerHTML = affirmations.length
+        ? affirmations.map(item => `<div class="note">${item.text}</div>`).join('')
+        : '<p>No affirmations yet.</p>';
+    }
+
+    loadAffirmations().catch(err => {
+      console.error(err);
+      document.getElementById('affirmations').innerHTML = '<p>Unable to load affirmations right now.</p>';
+    });
+  </script>
+</body>
+</html>

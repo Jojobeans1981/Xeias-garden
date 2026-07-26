@@ -913,6 +913,9 @@
                 <textarea class="affirmation-textarea" id="affirmationInput" placeholder="Type a reflection or daily reminder here..."></textarea>
                 <button class="btn-post-affirmation" id="btnPostAffirmation">Gather Note</button>
             </div>
+            <p style="margin-top: 16px; text-align: center;">
+                <a href="heart-garden.html" style="color: #ffb3c1; text-decoration: none; font-size: 0.9rem;">Open the Heart Garden →</a>
+            </p>
         </div>
 
         <!-- 🌳 Storage Garden Card -->
@@ -1333,8 +1336,9 @@
 
         function renderGarden() {
             const garden = getGarden();
-            const recent = garden.slice(0, 5);
-            const archive = garden.slice(5);
+            const songEntries = garden.filter(item => item.type === 'song');
+            const recent = songEntries.slice(0, 5);
+            const archive = songEntries.slice(5);
 
             const recentContainer = document.getElementById('recentGarden');
             if (recentContainer) {
