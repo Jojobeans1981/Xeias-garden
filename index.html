@@ -489,6 +489,7 @@
         .garden-item strong {
             display: block;
             color: #ff5d8f;
+            font-family: "Pacifico", cursive;
             font-weight: 400;
             text-transform: capitalize;
             margin-bottom: 4px;
@@ -496,6 +497,7 @@
 
         .garden-item p {
             color: #7a4a5f;
+            font-family: "Pacifico", cursive;
             font-size: 0.95rem;
             line-height: 1.5;
             margin-bottom: 8px;
@@ -1355,9 +1357,9 @@
 
         function renderGarden() {
             const garden = getGarden();
-            const songEntries = garden.filter(item => item.type === 'song');
-            const recent = songEntries.slice(0, 5);
-            const archive = songEntries.slice(5);
+            const entries = garden.filter(item => item.type === 'song' || item.type === 'affirmation');
+            const recent = entries.slice(0, 5);
+            const archive = entries.slice(5);
 
             const recentContainer = document.getElementById('recentGarden');
             if (recentContainer) {
