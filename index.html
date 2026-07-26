@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Xeia 💖</title>
+    <style>
+        /* --- Base & Reset --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1f1118 0%, #2d1422 50%, #1c0a13 100%);
+            color: #f7e6ee;
+            overflow-x: hidden;
+        }
+
+        /* --- Canvas for Particles --- */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* --- Viewport Containers --- */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+            padding: 20px;
+        }
+
+        /* --- Opening Screen (Soft Glow & Transition) --- */
+        #openingScreen {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(28, 10, 19, 0.6);
+        }
+
+        #openingScreen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.98);
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+        }
+
+        /* --- Soft Pink Garden Glass Card Configuration --- */
+        .glass-card {
+            background: rgba(255, 143, 163, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 182, 193, 0.3);
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255, 77, 109, 0.15), 
+                        inset 0 0 20px rgba(255, 182, 193, 0.05);
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* --- Typography --- */
+        .title-reveal {
+            font-size: 2.4rem;
+            font-weight: 300;
+            color: #ffb3c1;
+            margin-bottom: 18px;
+            letter-spacing: 1px;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 0;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 0 0 15px rgba(255, 179, 193, 0.4);
+            animation: typing 2.5s steps(15) 0.5s forwards;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: #dcbccb;
+            margin-bottom: 32px;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 1s ease forwards 2.2s;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100%; }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Warm Garden Button Component --- */
+        .btn-open {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(255, 143, 163, 0.2) 0%, rgba(255, 77, 109, 0.2) 100%);
+            color: #fff0f3;
+            border: 1px solid rgba(255, 182, 193, 0.4);
+            padding: 14px 32px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.15);
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 1s ease forwards 2.7s;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-open:hover {
+            background: linear-gradient(135deg, rgba(255, 143, 163, 0.3) 0%, rgba(255, 77, 109, 0.3) 100%);
+            border-color: rgba(255, 182, 193, 0.6);
+            box-shadow: 0 0 25px rgba(255, 143, 163, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-open:active {
+            transform: scale(0.98);
+        }
+
+        /* --- Main Content Layer (Scrollable narrative view) --- */
+        #mainContent {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 5;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.5s ease-in-out;
+            padding: 60px 20px 200px 20px;
+        }
+
+        body.content-active {
+            overflow-y: auto;
+        }
+
+        body.content-active #mainContent {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* --- Dreamy Glass Card Framework --- */
+        .tech-card-base {
+            background: rgba(36, 18, 28, 0.5);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 143, 163, 0.18);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 143, 163, 0.05);
+            max-width: 580px;
+            width: 100%;
+            position: relative;
+        }
+
+        .stationery-card {
+            padding: 50px 40px;
+            margin-top: 5vh;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.content-active .stationery-card {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .letter-text {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: #ebd2dd;
+            text-align: left;
+            letter-spacing: 0.2px;
+        }
+
+        .letter-text p {
+            margin-bottom: 24px;
+        }
+
+        .letter-text p.salutation {
+            font-size: 1.4rem;
+            font-weight: 300;
+            color: #ffb3c1;
+            margin-bottom: 32px;
+            text-shadow: 0 0 10px rgba(255, 179, 193, 0.2);
+        }
+
+        /* --- Ambient Music Player Widget --- */
+        .music-player-card {
+            padding: 40px 35px;
+            margin-top: 40px;
+            text-align: left;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+        }
+
+        body.content-active .music-player-card {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .player-header {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #ffb3c1;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .player-dedication {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #c7a4b6;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 143, 163, 0.15);
+            padding-bottom: 16px;
+        }
+
+        .audio-interface {
+            width: 100%;
+            background: rgba(24, 11, 19, 0.4);
+            border: 1px solid rgba(255, 143, 163, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .now-playing-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ff758f;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .current-track-title {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        audio.custom-controls {
+            width: 100%;
+            height: 36px;
+            outline: none;
+            filter: invert(0.1) hue-rotate(320deg) opacity(0.85);
+        }
+
+        .playlist-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 143, 163, 0.03);
+            border: 1px solid rgba(255, 143, 163, 0.1);
+            padding: 14px 18px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .playlist-item:hover {
+            background: rgba(255, 143, 163, 0.08);
+            border-color: rgba(255, 143, 163, 0.25);
+            transform: translateX(2px);
+        }
+
+        .playlist-item.active-track {
+            background: rgba(255, 143, 163, 0.12);
+            border-color: rgba(255, 143, 163, 0.4);
+        }
+
+        .track-info-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .track-icon {
+            font-size: 1rem;
+            color: #ff8fa3;
+        }
+
+        .track-name {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #ebd2dd;
+        }
+
+        .playlist-item.active-track .track-name {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .track-duration {
+            font-size: 0.8rem;
+            color: #ff758f;
+        }
+
+        /* --- Garden Reflection Mirror Widget --- */
+        .affirmation-card {
+            padding: 40px 35px;
+            margin-top: 40px;
+            text-align: left;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+        }
+
+        body.content-active .affirmation-card {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .affirmation-output-display {
+            background: rgba(24, 11, 19, 0.4);
+            border: 1px solid rgba(255, 143, 163, 0.15);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-style: italic;
+            line-height: 1.7;
+            color: #fff0f3;
+            font-size: 1.05rem;
+            position: relative;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        .affirmation-output-display::before {
+            content: '✿';
+            position: absolute;
+            top: 8px;
+            left: 14px;
+            font-size: 1rem;
+            color: rgba(255, 143, 163, 0.25);
+        }
+
+        .affirmation-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .affirmation-textarea {
+            width: 100%;
+            height: 75px;
+            background: rgba(36, 18, 28, 0.4);
+            border: 1px solid rgba(255, 143, 163, 0.2);
+            border-radius: 14px;
+            padding: 12px;
+            color: #ebd2dd;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: none;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .affirmation-textarea:focus {
+            border-color: rgba(255, 143, 163, 0.5);
+            background: rgba(36, 18, 28, 0.6);
+        }
+
+        .btn-post-affirmation {
+            align-self: flex-end;
+            background: rgba(255, 143, 163, 0.1);
+            color: #ffb3c1;
+            border: 1px solid rgba(255, 143, 163, 0.3);
+            padding: 8px 22px;
+            font-size: 0.85rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-post-affirmation:hover {
+            background: rgba(255, 143, 163, 0.2);
+            border-color: rgba(255, 143, 163, 0.5);
+        }
+
+        /* --- Storage Garden Card --- */
+        .garden-storage-card {
+            padding: 40px 35px;
+            margin-top: 40px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+        }
+
+        body.content-active .garden-storage-card {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .garden-item {
+            background: rgba(255, 143, 163, 0.08);
+            border: 1px solid rgba(255, 182, 193, 0.25);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            animation: bloom 0.8s ease;
+            transition: all 0.3s ease;
+        }
+
+        .garden-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(255, 143, 163, 0.25);
+        }
+
+        .garden-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .garden-item strong {
+            display: block;
+            color: #ffb3c1;
+            font-weight: 400;
+            text-transform: capitalize;
+            margin-bottom: 4px;
+        }
+
+        .garden-item p {
+            color: #ebd2dd;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .garden-item small {
+            color: #c7a4b6;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .hiddenGarden {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .hiddenGarden.open {
+            display: block;
+        }
+
+        .btn-archive-toggle {
+            margin-top: 16px;
+            background: rgba(255, 143, 163, 0.08);
+            color: #ffb3c1;
+            border: 1px solid rgba(255, 143, 163, 0.2);
+            padding: 10px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-archive-toggle:hover {
+            background: rgba(255, 143, 163, 0.18);
+            border-color: rgba(255, 143, 163, 0.5);
+        }
+
+        @keyframes bloom {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* --- Live Soft Heart Counter Widget --- */
+        .keepsake-timer-card {
+            padding: 40px 35px;
+            margin-top: 40px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+        }
+
+        body.content-active .keepsake-timer-card {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .timer-phrase {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #c7a4b6;
+            margin-bottom: 25px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .timer-grid {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .timer-unit {
+            background: rgba(24, 11, 19, 0.4);
+            border: 1px solid rgba(255, 143, 163, 0.12);
+            padding: 14px 8px;
+            border-radius: 16px;
+            min-width: 80px;
+        }
+
+        .timer-value {
+            font-size: 1.6rem;
+            font-weight: 300;
+            color: #ffb3c1;
+            font-variant-numeric: tabular-nums;
+            display: block;
+            text-shadow: 0 0 10px rgba(255, 179, 193, 0.3);
+        }
+
+        .timer-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #c7a4b6;
+            margin-top: 6px;
+            display: block;
+        }
+
+        /* --- Scroll Prompt --- */
+        .scroll-prompt {
+            margin-top: 50px;
+            margin-bottom: 100px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: #ff8fa3;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            animation: softBounce 2s infinite;
+            opacity: 0;
+            transition: opacity 1s ease 1s;
+        }
+
+        body.content-active .scroll-prompt {
+            opacity: 1;
+        }
+
+        @keyframes softBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(6px); }
+        }
+
+        /* --- Interactive Heart Section --- */
+        .heart-trigger-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 580px;
+        }
+
+        .giant-heart-btn {
+            background: none;
+            border: none;
+            font-size: 5rem;
+            cursor: pointer;
+            outline: none;
+            transform: scale(1);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: heartbeat 1.8s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 143, 163, 0.5));
+        }
+
+        .giant-heart-btn:hover {
+            transform: scale(1.08);
+        }
+
+        .giant-heart-btn:active {
+            transform: scale(0.96);
+        }
+
+        @keyframes heartbeat {
+            0%, 100%, 70% { transform: scale(1); }
+            35% { transform: scale(1.05); }
+            45% { transform: scale(1.02); }
+        }
+
+        /* --- Final Hidden Note Container --- */
+        .final-note-card {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transform: translateY(30px);
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 100%;
+            margin-top: 60px;
+            text-align: center;
+            position: relative;
+            padding: 0 40px;
+        }
+
+        .final-note-card.revealed {
+            max-height: 600px;
+            opacity: 1;
+            padding: 45px 40px 65px 40px;
+            transform: translateY(0);
+        }
+
+        .final-text {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: #ebd2dd;
+        }
+
+        .final-text p {
+            margin-bottom: 20px;
+        }
+
+        .final-text p:last-of-type {
+            margin-bottom: 0;
+            font-size: 1.3rem;
+            margin-top: 25px;
+            color: #ffb3c1;
+        }
+
+        /* --- Easter Egg Target Component --- */
+        .secret-flower-trigger {
+            display: inline-block;
+            margin-top: 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.3;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .secret-flower-trigger:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        /* --- Fullscreen Flower Explosion Overlay --- */
+        #flowerExplosionOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9;
+            pointer-events: none;
+        }
+
+        /* --- Easter Egg Overlay Modal --- */
+        .envelope-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(24, 11, 19, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s ease;
+            padding: 20px;
+        }
+
+        .envelope-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .envelope-modal {
+            background: rgba(43, 22, 34, 0.9);
+            border: 1px solid rgba(255, 143, 163, 0.3);
+            border-radius: 24px;
+            padding: 35px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 0 45px rgba(255, 143, 163, 0.2);
+            transform: scale(0.95) translateY(10px);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
+            position: relative;
+        }
+
+        .envelope-overlay.active .envelope-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .envelope-text {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #ebd2dd;
+        }
+
+        .envelope-text p {
+            margin-bottom: 16px;
+        }
+
+        .envelope-text p:last-child {
+            margin-bottom: 0;
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 20px;
+            color: #ffb3c1;
+        }
+
+        .btn-close-envelope {
+            position: absolute;
+            top: 15px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: #c7a4b6;
+            transition: color 0.2s ease;
+        }
+
+        .btn-close-envelope:hover {
+            color: #ffb3c1;
+        }
+
+        /* Responsive Layout Overrides */
+        @media (max-width: 768px) {
+            #mainContent {
+                padding: 40px 16px 150px 16px;
+            }
+            .stationery-card, .music-player-card, .affirmation-card, .keepsake-timer-card, .tech-card-base, .garden-storage-card {
+                padding: 35px 20px;
+            }
+            .letter-text, .final-text {
+                font-size: 0.95rem;
+            }
+            .timer-grid {
+                gap: 8px;
+            }
+            .timer-unit {
+                min-width: 68px;
+                padding: 10px 4px;
+            }
+            .timer-value {
+                font-size: 1.3rem;
+            }
+            .giant-heart-btn {
+                font-size: 4rem;
+            }
+            .envelope-modal {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Core Player Audio Element -->
+    <audio id="bgMusic" loop class="custom-controls">
+        <source id="audioSource" src="music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Particle Engine Surface -->
+    <canvas id="particleCanvas"></canvas>
+    
+    <!-- Flower Explosion Surface -->
+    <canvas id="flowerExplosionOverlay"></canvas>
+
+    <!-- 1. Opening Screen Overlay -->
+    <div id="openingScreen" class="screen">
+        <div class="glass-card">
+            <div class="title-reveal">For Xeia 💖</div>
+            <div class="subtitle">Even though we live in two different worlds, this is a little corner of my digital world just for you.</div>
+            <button class="btn-open" id="btnOpen">
+                Enter Garden
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. Main Narrative Layer -->
+    <div id="mainContent">
+        <div class="tech-card-base stationery-card">
+            <div class="letter-text">
+                <p class="salutation">Dear Xeia,</p>
+                <p>I wanted to make you something instead of just sending another message.</p>
+                <p>I don't know if anyone tells you this often enough, but the way you see people is rare. In a world full of <span id="trigger-noise" style="cursor: pointer; color: #ff8fa3; text-decoration: underline dotted rgba(255, 143, 163, 0.6);">noise</span>, getting to know you and witnessing how your mind works has become incredibly meaningful to me.</p>
+                <p>You always seem to look for the good in everyone. Somehow you manage to notice qualities that other people overlook, and that's something I've admired from the very beginning.</p>
+                <p>Every conversation with you leaves me feeling a little lighter than before.</p>
+                <p>I honestly don't know how you do it.</p>
+                <p>Maybe it's your kindness.</p>
+                <p>Maybe it's your positivity.</p>
+                <p>Maybe it's simply that being around you makes the world feel warmer.</p>
+                <p>Whatever it is...</p>
+                <p>Thank you for being exactly who you are, and for letting me be a part of your world. You have a way of making ordinary moments feel genuinely unforgettable.</p>
+                <p>You probably don't realize how much light you bring with you, or how uniquely valuable your presence is to me<span id="trigger-ellipsis" style="cursor: pointer; color: #ffb3c1; font-weight: bold;">...</span></p>
+            </div>
+        </div>
+
+        <!-- Ambient Music Playlist Widget -->
+        <div class="tech-card-base music-player-card">
+            <div class="player-header">
+                🎵 <span>Garden Melodies</span>
+            </div>
+            <div class="player-dedication">
+                Sometimes words on a screen aren't quite enough to hold the weight of everything. These are the tracks I write for you, dedicate to you, or put on when I'm thinking about you just down the hall. Play them whenever you visit this space.
+            </div>
+            
+            <div class="audio-interface">
+                <span class="now-playing-label">Now Playing</span>
+                <div class="current-track-title" id="currentTrackDisplay">Background Static (Theme)</div>
+                <audio id="inlineAudioPlayer" controls class="custom-controls"></audio>
+            </div>
+
+            <div class="playlist-container">
+                <!-- Track 1 -->
+                <div class="playlist-item active-track" data-src="music.mp3" data-title="Background Static (Theme)">
+                    <div class="track-info-box">
+                        <span class="track-icon">🌸</span>
+                        <span class="track-name">Background Static (Theme)</span>
+                    </div>
+                    <span class="track-duration">Track 01</span>
+                </div>
+                <!-- Track 2 -->
+                <div class="playlist-item" data-src="ifyoushouldcall.mp3" data-title="If You Should Call">
+                    <div class="track-info-box">
+                        <span class="track-icon">🍃</span>
+                        <span class="track-name">If You Should Call</span>
+                    </div>
+                    <span class="track-duration">Track 02</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Garden Reflection Mirror Widget -->
+        <div class="tech-card-base affirmation-card">
+            <div class="player-header">
+                💭 <span>Daily Anchor & Reflections</span>
+            </div>
+            <div class="player-dedication">
+                Leave a daily quote, reminder, or affirmation here. Your notes become part of the garden.
+            </div>
+            
+            <div class="affirmation-output-display" id="affirmationDisplay">
+                Your daily anchor will manifest here...
+            </div>
+
+            <div class="affirmation-input-group">
+                <textarea class="affirmation-textarea" id="affirmationInput" placeholder="Type a reflection or daily reminder here..."></textarea>
+                <button class="btn-post-affirmation" id="btnPostAffirmation">Gather Note</button>
+            </div>
+        </div>
+
+        <!-- 🌳 Storage Garden Card -->
+        <div class="tech-card-base garden-storage-card">
+            <div class="player-header">
+                🌳 <span>Storage Garden</span>
+            </div>
+            <div class="player-dedication">
+                Everything planted here stays in the garden. The last five blooms are fresh — older memories grow deeper roots.
+            </div>
+
+            <div id="gardenSyncNotice" style="display:none; margin-bottom: 16px; padding: 10px 14px; background: rgba(255,143,163,0.12); border: 1px solid rgba(255,143,163,0.3); border-radius: 12px; color: #ffb3c1; font-size: 0.82rem;">
+                Couldn't reach the garden's memory just now — the last change may not have saved. Try again in a moment.
+            </div>
+
+            <!-- Plant a song by link — this is the one that persists and shows up for anyone who visits -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #ffb3c1; font-size: 0.9rem; margin-bottom: 8px;">🎵 Plant a new song seed (by link):</label>
+                <input type="text" id="songTitleInput" placeholder="Song name" style="width: 100%; margin-bottom: 8px; padding: 10px; background: rgba(36, 18, 28, 0.4); border: 1px solid rgba(255, 143, 163, 0.2); border-radius: 14px; color: #ebd2dd; font-size: 0.85rem;">
+                <input type="text" id="songUrlInput" placeholder="Link to the audio file (.mp3, .m4a…)" style="width: 100%; margin-bottom: 8px; padding: 10px; background: rgba(36, 18, 28, 0.4); border: 1px solid rgba(255, 143, 163, 0.2); border-radius: 14px; color: #ebd2dd; font-size: 0.85rem;">
+                <button id="btnAddSongUrl" class="btn-post-affirmation" style="width: auto; padding: 10px 20px;">Plant it</button>
+            </div>
+
+            <!-- Upload from this device — plays now, but only for this visit -->
+            <div style="margin-bottom: 20px;">
+                <label for="songUpload" style="display: block; color: #ffb3c1; font-size: 0.9rem; margin-bottom: 8px;">Or pick a file from this device (this visit only):</label>
+                <input type="file" id="songUpload" accept="audio/*" style="width: 100%; padding: 10px; background: rgba(36, 18, 28, 0.4); border: 1px solid rgba(255, 143, 163, 0.2); border-radius: 14px; color: #ebd2dd; font-size: 0.85rem;">
+            </div>
+
+            <div id="recentGarden"></div>
+
+            <button class="btn-archive-toggle" id="openArchive">🌸 Open Full Garden Archive</button>
+
+            <div id="archiveGarden" class="hiddenGarden"></div>
+        </div>
+
+        <!-- Live Impact Tracker Widget -->
+        <div class="tech-card-base keepsake-timer-card">
+            <div class="timer-phrase" id="trigger-timer" style="cursor: pointer;" title="Read a note">
+                "I decided to keep track of how many days got that much better because you walked into my life..."
+            </div>
+            <div class="timer-grid">
+                <div class="timer-unit">
+                    <span class="timer-value" id="daysValue">00</span>
+                    <span class="timer-label">Days</span>
+                </div>
+                <div class="timer-unit">
+                    <span class="timer-value" id="hoursValue">00</span>
+                    <span class="timer-label">Hours</span>
+                </div>
+                <div class="timer-unit">
+                    <span class="timer-value" id="minutesValue">00</span>
+                    <span class="timer-label">Mins</span>
+                </div>
+                <div class="timer-unit">
+                    <span class="timer-value" id="secondsValue">00</span>
+                    <span class="timer-label">Secs</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-prompt">
+            <span>Scroll Down</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+        </div>
+
+        <!-- Interactive Final Action Section -->
+        <div class="heart-trigger-section">
+            <button class="giant-heart-btn" id="giantHeart" aria-label="Press with Love">❤️</button>
+            
+            <div class="tech-card-base final-note-card" id="finalNoteCard">
+                <div class="final-text">
+                    <p>I don't expect anything from this.</p>
+                    <p>I simply wanted you to have something tangible that reminds you how wonderful, irreplaceable, and truly special you are to me.</p>
+                    <p>If this page ever makes you smile...</p>
+                    <p>then it did exactly what I hoped it would.</p>
+                    <p><span id="trigger-heartbreak" style="cursor: pointer; display: inline-block;" title="A deeper ache">❤️</span></p>
+                </div>
+                <!-- Secret Easter Egg Flower -->
+                <div class="secret-flower-trigger" id="secretFlower" title="Look Closer">🌸</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Hidden Envelope Modal Surface -->
+    <div class="envelope-overlay" id="envelopeOverlay">
+        <div class="envelope-modal">
+            <button class="btn-close-envelope" id="btnCloseEnvelope" aria-label="Close" style="cursor: pointer;" title="Don't go just yet...">✕</button>
+            
+            <!-- Message 1: The Flower Secret -->
+            <div class="envelope-text secret-msg" id="msg-flower" style="display: none;">
+                <p>You found the secret. 😊</p>
+                <p>I almost didn't include this...</p>
+                <p>But since you found it...</p>
+                <p>The roses I sent you were beautiful. They still weren't as beautiful as the person they were meant for.</p>
+                <p>I hope life keeps giving you reasons to smile. And whenever it doesn't... I hope you remember there's someone quietly cheering for you, holding you close in their thoughts.</p>
+                <p>❤️</p>
+            </div>
+
+            <!-- Message 2: Hidden in the Main Letter (Clickable Word) -->
+            <div class="envelope-text secret-msg" id="msg-noise" style="display: none;">
+                <p>You found another one. 😉</p>
+                <p>I used the word "noise" in that sentence because sometimes everything else gets completely deafening. Work, routines, expectations—it’s easy to feel lost in it.</p>
+                <p>But when I'm talking to you, all of that background static just sort of disappears. It's a clarity I don't find anywhere else, and I'm deeply grateful for it.</p>
+                <p>❤️</p>
+            </div>
+
+            <!-- Message 3: Hidden in the Timer Card -->
+            <div class="envelope-text secret-msg" id="msg-timer" style="display: none;">
+                <p>Look at you, exploring everything. ✨</p>
+                <p>Time is a funny thing. We spend so much of it running on autopilot, just getting through days without really keeping track of them.</p>
+                <p>But ever since you arrived, I found myself actually wanting to count the hours. You made ordinary days feel worth holding onto.</p>
+                <p>❤️</p>
+            </div>
+
+            <!-- Message 4: Hidden in the Ellipsis (...) -->
+            <div class="envelope-text secret-msg" id="msg-ellipsis" style="display: none;">
+                <p>You clicked the empty space. 🍂</p>
+                <p>The hardest part about sharing a home with you while waiting on a threshold is knowing exactly where the boundaries are. We share a kitchen, we share walls, we share routines—and yet sometimes it feels like there's a language we haven't quite figured out how to speak out loud yet.</p>
+                <p>I don't mind the quiet spaces or the trailing sentences. I'm content to leave things unsaid, as long as you know I'm not going anywhere.</p>
+                <p>❤️</p>
+            </div>
+
+            <!-- Message 5: Hidden in the Final "❤️" -->
+            <div class="envelope-text secret-msg" id="msg-heartbreak" style="display: none;">
+                <p>It’s a unique kind of weight, isn’t it? 🌧️</p>
+                <p>When you told me you weren't ready, but that I shouldn't give up... it felt like a door being left just a fraction of an inch ajar. It’s hard to sit in a quiet house and realize the person you're entirely wrapped up in is sleeping just down the hall, completely out of reach for now.</p>
+                <p>But I meant what I said. I'm right here. I'm not giving up on you, Xeia. Take all the time you need.</p>
+                <p>❤️</p>
+            </div>
+
+            <!-- Message 6: Hidden in the Closing "✕" Button -->
+            <div class="envelope-text secret-msg" id="msg-close" style="display: none;">
+                <p>Caught you trying to close the note. ⏳</p>
+                <p>It's okay to close this window and go back to normal. We'll cross paths in the kitchen later, we'll talk about regular things, and everything will be just as it was.</p>
+                <p>But even when this screen is off, the tracker keeps running. I'm still right here under the same roof, holding onto your words, quietly thankful you're in my life.</p>
+                <p>❤️</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Particle & Engine Initialization ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        const flowerCanvas = document.getElementById('flowerExplosionOverlay');
+        const fCtx = flowerCanvas.getContext('2d');
+
+        let particles = [];
+        let mouseSparkles = [];
+        let flowerExplosions = [];
+        
+        // Fixed for everyone who visits — not per-browser anymore.
+        // Change this one line if the real start date ever needs correcting.
+        const GARDEN_COLLECTED_ON = '2026-06-26T00:00:00';
+        let trackerStartTime = new Date(GARDEN_COLLECTED_ON).getTime();
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            flowerCanvas.width = window.innerWidth;
+            flowerCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height;
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 20;
+                this.size = Math.random() * 10 + 5;
+                this.speedY = -(Math.random() * 1.0 + 0.4);
+                this.speedX = Math.sin(Math.random() * Math.PI) * 0.3;
+                this.type = Math.random() > 0.6 ? 'heart' : 'petal';
+                this.rotation = Math.random() * 360;
+                this.rotSpeed = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.25 + 0.15;
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX + Math.sin(this.y / 40) * 0.3;
+                this.rotation += this.rotSpeed;
+
+                if (this.y < -20 || this.x < -20 || this.x > canvas.width + 20) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.globalAlpha = this.opacity;
+
+                if (this.type === 'heart') {
+                    ctx.fillStyle = '#ff8fa3';
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(-this.size/2, -this.size/2, -this.size, 0, 0, this.size);
+                    ctx.bezierCurveTo(this.size, 0, this.size/2, -this.size/2, 0, 0);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = '#ffb3c1';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.size / 1.6, this.size, 0, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        class Sparkle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1.5;
+                this.speedX = (Math.random() - 0.5) * 1.2;
+                this.speedY = (Math.random() - 0.5) * 1.2;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.018 + 0.012;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= this.decay;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = '#fff0f3';
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = '#ff8fa3';
+                
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y - this.size);
+                ctx.quadraticCurveTo(this.x, this.y, this.x + this.size, this.y);
+                ctx.quadraticCurveTo(this.x, this.y, this.x, this.y + this.size);
+                ctx.quadraticCurveTo(this.x, this.y, this.x - this.size, this.y);
+                ctx.quadraticCurveTo(this.x, this.y, this.x, this.y - this.size);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class ExplodingFlower {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 12 + 6;
+                const angle = Math.random() * Math.PI * 2;
+                const force = Math.random() * 5 + 1.5;
+                this.speedX = Math.cos(angle) * force;
+                this.speedY = Math.sin(angle) * force;
+                this.gravity = 0.05;
+                this.alpha = 1;
+                this.rotation = Math.random() * 360;
+                this.rotSpeed = (Math.random() - 0.5) * 3;
+                this.color = ['#fff0f3', '#ffccd5', '#ffb3c1', '#ff8fa3', '#f7e6ee'][Math.floor(Math.random() * 5)];
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.speedY += this.gravity;
+                this.alpha -= 0.009;
+                this.rotation += this.rotSpeed;
+            }
+
+            draw() {
+                fCtx.save();
+                fCtx.translate(this.x, this.y);
+                fCtx.rotate((this.rotation * Math.PI) / 180);
+                fCtx.globalAlpha = this.alpha;
+                fCtx.fillStyle = this.color;
+                
+                for (let i = 0; i < 5; i++) {
+                    fCtx.rotate((72 * Math.PI) / 180);
+                    fCtx.beginPath();
+                    fCtx.ellipse(0, -this.size / 2, this.size / 3, this.size / 2, 0, 0, 2 * Math.PI);
+                    fCtx.fill();
+                }
+                fCtx.beginPath();
+                fCtx.arc(0, 0, this.size / 4, 0, 2 * Math.PI);
+                fCtx.fillStyle = '#fffdf0';
+                fCtx.fill();
+                
+                fCtx.restore();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) {
+            particles.push(new Particle());
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            if(Math.random() > 0.4) {
+                mouseSparkles.push(new Sparkle(e.clientX, e.clientY));
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if(Math.random() > 0.4) {
+                mouseSparkles.push(new Sparkle(e.touches[0].clientX, e.touches[0].clientY));
+            }
+        });
+
+        function updateKeepsakeTimer() {
+            if (!trackerStartTime) return;
+            
+            const now = new Date().getTime();
+            const difference = now - trackerStartTime;
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('daysValue').textContent = String(days).padStart(2, '0');
+            document.getElementById('hoursValue').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutesValue').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('secondsValue').textContent = String(seconds).padStart(2, '0');
+        }
+
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            fCtx.clearRect(0, 0, flowerCanvas.width, flowerCanvas.height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            for (let i = mouseSparkles.length - 1; i >= 0; i--) {
+                mouseSparkles[i].update();
+                if (mouseSparkles[i].alpha <= 0) {
+                    mouseSparkles.splice(i, 1);
+                } else {
+                    mouseSparkles[i].draw();
+                }
+            }
+
+            for (let i = flowerExplosions.length - 1; i >= 0; i--) {
+                flowerExplosions[i].update();
+                if (flowerExplosions[i].alpha <= 0) {
+                    flowerExplosions.splice(i, 1);
+                } else {
+                    flowerExplosions[i].draw();
+                }
+            }
+
+            updateKeepsakeTimer();
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+        // --- Garden Storage Engine ---
+        // Backed by /api/garden (shared, persistent — same data for
+        // anyone who opens this page, on any device). A local cache
+        // keeps the UI instant; every change is pushed to the server.
+        let gardenCache = [];
+        let gardenSyncFailed = false;
+
+        async function fetchGarden() {
+            try {
+                const res = await fetch('/api/garden', { cache: 'no-store' });
+                if (!res.ok) throw new Error('bad-status');
+                const data = await res.json();
+                gardenCache = Array.isArray(data.garden) ? data.garden : [];
+                gardenSyncFailed = false;
+            } catch (e) {
+                gardenSyncFailed = true;
+            }
+            return gardenCache;
+        }
+
+        function getGarden() {
+            return gardenCache;
+        }
+
+        async function pushGarden() {
+            try {
+                const res = await fetch('/api/garden', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ garden: gardenCache })
+                });
+                gardenSyncFailed = !res.ok;
+            } catch (e) {
+                gardenSyncFailed = true;
+            }
+            renderSyncNotice();
+        }
+
+        function renderSyncNotice() {
+            const el = document.getElementById('gardenSyncNotice');
+            if (!el) return;
+            el.style.display = gardenSyncFailed ? 'block' : 'none';
+        }
+
+        function saveGardenItem(type, text, extra = {}) {
+            gardenCache.unshift({
+                type: type,
+                text: text,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                ...extra
+            });
+            renderGarden();
+            pushGarden();
+        }
+
+        function renderGarden() {
+            const garden = getGarden();
+            const recent = garden.slice(0, 5);
+            const archive = garden.slice(5);
+
+            const recentContainer = document.getElementById('recentGarden');
+            if (recentContainer) {
+                recentContainer.innerHTML = recent.map((item, index) => `
+                    <div class="garden-item" style="animation-delay: ${index * 0.1}s">
+                        <div class="garden-icon">${item.type === 'song' ? '🎵' : '🌸'}</div>
+                        <strong>${item.type}</strong>
+                        <p>${item.text}</p>
+                        <small>${item.date}</small>
+                    </div>
+                `).join('') || '<p style="color: #c7a4b6; text-align: center; padding: 20px;">The garden is empty. Plant something new. 🌱</p>';
+            }
+
+            const archiveContainer = document.getElementById('archiveGarden');
+            if (archiveContainer) {
+                archiveContainer.innerHTML = archive.map((item) => `
+                    <div class="garden-item">
+                        <div class="garden-icon">${item.type === 'song' ? '🌹' : '🌱'}</div>
+                        <p>${item.text}</p>
+                        <small>${item.date}</small>
+                    </div>
+                `).join('') || '<p style="color: #c7a4b6; text-align: center; padding: 20px;">No older memories yet. Keep planting. 🌿</p>';
+            }
+        }
+
+        // --- Event Core Handling ---
+        const btnOpen = document.getElementById('btnOpen');
+        const openingScreen = document.getElementById('openingScreen');
+        const giantHeart = document.getElementById('giantHeart');
+        const finalNoteCard = document.getElementById('finalNoteCard');
+        const secretFlower = document.getElementById('secretFlower');
+        const envelopeOverlay = document.getElementById('envelopeOverlay');
+        const btnCloseEnvelope = document.getElementById('btnCloseEnvelope');
+        const baseAudio = document.getElementById('bgMusic');
+        const inlinePlayer = document.getElementById('inlineAudioPlayer');
+        const currentTrackDisplay = document.getElementById('currentTrackDisplay');
+
+        // Affirmation Elements
+        const affirmationDisplay = document.getElementById('affirmationDisplay');
+        const affirmationInput = document.getElementById('affirmationInput');
+        const btnPostAffirmation = document.getElementById('btnPostAffirmation');
+
+        function refreshAffirmationDisplay() {
+            const garden = getGarden();
+            const lastAffirmation = garden.find(item => item.type === 'affirmation');
+            affirmationDisplay.textContent = lastAffirmation
+                ? lastAffirmation.text
+                : "Your daily anchor will manifest here...";
+        }
+
+        function addPlaylistItem(src, title, { removable = false, id = null } = {}) {
+            const container = document.querySelector('.playlist-container');
+            const item = document.createElement('div');
+            item.className = 'playlist-item';
+            item.setAttribute('data-src', src);
+            item.setAttribute('data-title', title);
+            item.innerHTML = `
+                <div class="track-info-box">
+                    <span class="track-icon">${removable ? '🌷' : '🌸'}</span>
+                    <span class="track-name">${title}</span>
+                </div>
+                <span class="track-duration">${removable ? 'yours' : ''}</span>
+            `;
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.playlist-item').forEach(i => i.classList.remove('active-track'));
+                item.classList.add('active-track');
+                currentTrackDisplay.textContent = title;
+                inlinePlayer.src = src;
+                inlinePlayer.play().catch(e => console.log("Playback interrupted: ", e));
+            });
+            if (removable && id) {
+                const rm = document.createElement('button');
+                rm.textContent = '✕';
+                rm.title = 'Remove from garden';
+                rm.style.cssText = 'background:none;border:0;color:#c7a4b6;cursor:pointer;font-size:0.9rem;padding:4px 8px;';
+                rm.addEventListener('click', (evt) => {
+                    evt.stopPropagation();
+                    gardenCache = gardenCache.filter(g => g.id !== id);
+                    item.remove();
+                    renderGarden();
+                    pushGarden();
+                });
+                item.appendChild(rm);
+            }
+            container.appendChild(item);
+        }
+
+        function sparkleBurst(rect, count) {
+            for (let i = 0; i < count; i++) {
+                mouseSparkles.push(new Sparkle(
+                    rect.left + rect.width / 2 + (Math.random() - 0.5) * 100,
+                    rect.top + rect.height / 2 + (Math.random() - 0.5) * 60
+                ));
+            }
+        }
+
+        // --- Initial load: pull the shared garden, then wire everything up ---
+        (async function initGarden() {
+            await fetchGarden();
+            renderGarden();
+            refreshAffirmationDisplay();
+            renderSyncNotice();
+
+            // Any songs already planted (by either of you, on any device)
+            // reappear in the playlist here.
+            getGarden()
+                .filter(item => item.type === 'song' && item.url)
+                .reverse() // oldest-planted first, after the two seed tracks
+                .forEach(item => addPlaylistItem(item.url, item.text, { removable: true, id: item.id }));
+        })();
+
+        // Handle Posting Affirmations (saves to garden)
+        btnPostAffirmation.addEventListener('click', () => {
+            const text = affirmationInput.value.trim();
+            if (text !== "") {
+                saveGardenItem('affirmation', text);
+                affirmationDisplay.textContent = text;
+                affirmationInput.value = "";
+                sparkleBurst(affirmationDisplay.getBoundingClientRect(), 15);
+            }
+        });
+
+        // Song Upload Handler — picked from this device.
+        // Plays for this visit, but a local file can't be persisted to
+        // the server, so it won't be there on reload or for Xeia unless
+        // it's added by link (below) instead.
+        const songUpload = document.getElementById('songUpload');
+        if (songUpload) {
+            songUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const objectUrl = URL.createObjectURL(file);
+                    const title = file.name.replace(/\.[^.]+$/, '') + ' (this visit only)';
+                    addPlaylistItem(objectUrl, title);
+                    sparkleBurst(songUpload.getBoundingClientRect(), 20);
+                    songUpload.value = '';
+                }
+            });
+        }
+
+        // Song-by-link Handler — this is the one that actually persists
+        // and shows up for anyone who opens the page afterward.
+        const songUrlInput = document.getElementById('songUrlInput');
+        const songTitleInput = document.getElementById('songTitleInput');
+        const btnAddSongUrl = document.getElementById('btnAddSongUrl');
+        if (btnAddSongUrl) {
+            btnAddSongUrl.addEventListener('click', () => {
+                const url = songUrlInput.value.trim();
+                const title = songTitleInput.value.trim() || 'Untitled seed';
+                if (!url) return;
+                try {
+                    new URL(url);
+                } catch {
+                    alert("That needs to be a full link, starting with https://");
+                    return;
+                }
+                const id = 'song-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+                saveGardenItem('song', title, { url, id });
+                addPlaylistItem(url, title, { removable: true, id });
+                sparkleBurst(btnAddSongUrl.getBoundingClientRect(), 20);
+                songUrlInput.value = '';
+                songTitleInput.value = '';
+            });
+        }
+
+        // Archive toggle
+        document.getElementById('openArchive').addEventListener('click', () => {
+            document.getElementById('archiveGarden').classList.toggle('open');
+        });
+
+        // Sync initial track load
+        inlinePlayer.src = baseAudio.querySelector('source').src;
+
+        btnOpen.addEventListener('click', () => {
+            openingScreen.classList.add('fade-out');
+            document.body.classList.add('content-active');
+            
+            inlinePlayer.play().catch(error => {
+                console.log("Audio playback interaction safety fallback: ", error);
+            });
+            
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+
+            for(let i=0; i<20; i++) {
+                mouseSparkles.push(new Sparkle(window.innerWidth/2, window.innerHeight/2 + 50));
+            }
+        });
+
+        // --- Playlist Item Event Listeners ---
+        document.querySelectorAll('.playlist-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.playlist-item').forEach(i => i.classList.remove('active-track'));
+                this.classList.add('active-track');
+                
+                const trackSrc = this.getAttribute('data-src');
+                const trackTitle = this.getAttribute('data-title');
+                
+                currentTrackDisplay.textContent = trackTitle;
+                inlinePlayer.src = trackSrc;
+                inlinePlayer.play().catch(e => console.log("Playback interrupted: ", e));
+            });
+        });
+
+        giantHeart.addEventListener('click', () => {
+            const rect = giantHeart.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for(let i = 0; i < 100; i++) {
+                flowerExplosions.push(new ExplodingFlower(
+                    centerX + (Math.random() - 0.5) * 40,
+                    centerY + (Math.random() - 0.5) * 40
+                ));
+            }
+
+            finalNoteCard.classList.add('revealed');
+            setTimeout(() => {
+                finalNoteCard.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
+        });
+
+        // --- Shared Secret Overlay Engine ---
+        function showSecretMessage(messageId) {
+            document.querySelectorAll('.secret-msg').forEach(msg => {
+                msg.style.display = 'none';
+            });
+            
+            const targetMsg = document.getElementById(messageId);
+            if (targetMsg) {
+                targetMsg.style.display = 'block';
+            }
+            
+            envelopeOverlay.classList.add('active');
+            
+            for(let i=0; i<25; i++) {
+                mouseSparkles.push(new Sparkle(window.innerWidth/2, window.innerHeight/2));
+            }
+        }
+
+        // Trigger 1: Original Flower Button
+        secretFlower.addEventListener('click', () => {
+            showSecretMessage('msg-flower');
+        });
+
+        // Trigger 2: Inline Text Link ("noise")
+        const triggerNoise = document.getElementById('trigger-noise');
+        if (triggerNoise) {
+            triggerNoise.addEventListener('click', () => {
+                showSecretMessage('msg-noise');
+            });
+        }
+
+        // Trigger 3: Timer Title Card
+        const triggerTimer = document.getElementById('trigger-timer');
+        if (triggerTimer) {
+            triggerTimer.addEventListener('click', () => {
+                showSecretMessage('msg-timer');
+            });
+        }
+
+        // Trigger 4: Trailing Ellipsis (...)
+        const triggerEllipsis = document.getElementById('trigger-ellipsis');
+        if (triggerEllipsis) {
+            triggerEllipsis.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showSecretMessage('msg-ellipsis');
+            });
+        }
+
+        // Trigger 5: Final Note Heart
+        const triggerHeartbreak = document.getElementById('trigger-heartbreak');
+        if (triggerHeartbreak) {
+            triggerHeartbreak.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showSecretMessage('msg-heartbreak');
+            });
+        }
+
+        // Trigger 6: Close Button Intercept Logic
+        btnCloseEnvelope.addEventListener('click', (e) => {
+            const currentActiveMsg = Array.from(document.querySelectorAll('.secret-msg')).find(msg => msg.style.display === 'block');
+            
+            if (currentActiveMsg && currentActiveMsg.id !== 'msg-close') {
+                e.preventDefault();
+                e.stopPropagation();
+                showSecretMessage('msg-close');
+            } else {
+                envelopeOverlay.classList.remove('active');
+            }
+        });
+
+        envelopeOverlay.addEventListener('click', (e) => {
+            if(e.target === envelopeOverlay) {
+                envelopeOverlay.classList.remove('active');
+            }
+        });
+
+        // Render garden on load
+        renderGarden();
+    </script>
+</body>
+</html>
