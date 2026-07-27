@@ -732,6 +732,14 @@
             color: #7a4a5f;
         }
 
+        .surprise-message {
+            margin-bottom: 22px;
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: #ff5d8f;
+            font-style: italic;
+        }
+
         .final-text p {
             margin-bottom: 20px;
         }
@@ -1025,7 +1033,7 @@
         <!-- Live Impact Tracker Widget -->
         <div class="tech-card-base keepsake-timer-card">
             <div class="timer-phrase" id="trigger-timer" style="cursor: pointer;" title="Read a note">
-                "I decided to keep track of how many days got that much better because you walked into my life..."
+                "A little counter for the days that felt a bit brighter because you were in them."
             </div>
             <div class="timer-grid">
                 <div class="timer-unit">
@@ -1058,10 +1066,10 @@
             
             <div class="tech-card-base final-note-card" id="finalNoteCard">
                 <div class="final-text">
-                    <p>I don't expect anything from this.</p>
-                    <p>I simply wanted you to have something tangible that reminds you how wonderful, irreplaceable, and truly special you are to me.</p>
-                    <p>If this page ever makes you smile...</p>
-                    <p>then it did exactly what I hoped it would.</p>
+                    <p id="surpriseMessage" class="surprise-message"></p>
+                    <p>I wanted this to feel like a small place to come back to.</p>
+                    <p>Something soft. Something steady. Something that feels like warmth without needing to say too much.</p>
+                    <p>If this makes you smile, then it did what I hoped.</p>
                     <p><span id="trigger-heartbreak" style="cursor: pointer; display: inline-block;" title="A deeper ache">❤️</span></p>
                 </div>
                 <!-- Secret Easter Egg Flower -->
@@ -1078,50 +1086,50 @@
             <!-- Message 1: The Flower Secret -->
             <div class="envelope-text secret-msg" id="msg-flower" style="display: none;">
                 <p>You found the secret. 😊</p>
-                <p>I almost didn't include this...</p>
-                <p>But since you found it...</p>
-                <p>The roses I sent you were beautiful. They still weren't as beautiful as the person they were meant for.</p>
-                <p>I hope life keeps giving you reasons to smile. And whenever it doesn't... I hope you remember there's someone quietly cheering for you, holding you close in their thoughts.</p>
+                <p>I wanted this to feel a little playful and a little tender.</p>
+                <p>Like something made just for you to find when you were ready.</p>
+                <p>I hope it brings a small smile, even on a busy day.</p>
                 <p>❤️</p>
             </div>
 
             <!-- Message 2: Hidden in the Main Letter (Clickable Word) -->
             <div class="envelope-text secret-msg" id="msg-noise" style="display: none;">
                 <p>You found another one. 😉</p>
-                <p>I used the word "noise" in that sentence because sometimes everything else gets completely deafening. Work, routines, expectations—it’s easy to feel lost in it.</p>
-                <p>But when I'm talking to you, all of that background static just sort of disappears. It's a clarity I don't find anywhere else, and I'm deeply grateful for it.</p>
+                <p>Sometimes the world gets loud. A little too loud.</p>
+                <p>But you have a way of making things feel calmer, warmer, and easier to hold.</p>
+                <p>That matters more than I can say.</p>
                 <p>❤️</p>
             </div>
 
             <!-- Message 3: Hidden in the Timer Card -->
             <div class="envelope-text secret-msg" id="msg-timer" style="display: none;">
                 <p>Look at you, exploring everything. ✨</p>
-                <p>Time is a funny thing. We spend so much of it running on autopilot, just getting through days without really keeping track of them.</p>
-                <p>But ever since you arrived, I found myself actually wanting to count the hours. You made ordinary days feel worth holding onto.</p>
+                <p>Some days feel better just because you’re part of them.</p>
+                <p>This little counter is just a small way of remembering that.</p>
                 <p>❤️</p>
             </div>
 
             <!-- Message 4: Hidden in the Ellipsis (...) -->
             <div class="envelope-text secret-msg" id="msg-ellipsis" style="display: none;">
                 <p>You clicked the empty space. 🍂</p>
-                <p>The hardest part about sharing a home with you while waiting on a threshold is knowing exactly where the boundaries are. We share a kitchen, we share walls, we share routines—and yet sometimes it feels like there's a language we haven't quite figured out how to speak out loud yet.</p>
-                <p>I don't mind the quiet spaces or the trailing sentences. I'm content to leave things unsaid, as long as you know I'm not going anywhere.</p>
+                <p>Some things are easier to leave gentle and unsaid.</p>
+                <p>Not because they don’t matter, but because some feelings are better when they’re soft.</p>
                 <p>❤️</p>
             </div>
 
             <!-- Message 5: Hidden in the Final "❤️" -->
             <div class="envelope-text secret-msg" id="msg-heartbreak" style="display: none;">
-                <p>It’s a unique kind of weight, isn’t it? 🌧️</p>
-                <p>When you told me you weren't ready, but that I shouldn't give up... it felt like a door being left just a fraction of an inch ajar. It’s hard to sit in a quiet house and realize the person you're entirely wrapped up in is sleeping just down the hall, completely out of reach for now.</p>
-                <p>But I meant what I said. I'm right here. I'm not giving up on you, Xeia. Take all the time you need.</p>
+                <p>It’s a tender kind of feeling, isn’t it? 🌧️</p>
+                <p>Some things take time. Some things need patience.</p>
+                <p>And some people stay in your heart quietly, even when life is moving in a slower way.</p>
                 <p>❤️</p>
             </div>
 
             <!-- Message 6: Hidden in the Closing "✕" Button -->
             <div class="envelope-text secret-msg" id="msg-close" style="display: none;">
                 <p>Caught you trying to close the note. ⏳</p>
-                <p>It's okay to close this window and go back to normal. We'll cross paths in the kitchen later, we'll talk about regular things, and everything will be just as it was.</p>
-                <p>But even when this screen is off, the tracker keeps running. I'm still right here under the same roof, holding onto your words, quietly thankful you're in my life.</p>
+                <p>It’s okay to step away. The garden will still be here when you come back.</p>
+                <p>And the little counter keeps going, quietly remembering the good parts of the days you’ve been in.</p>
                 <p>❤️</p>
             </div>
         </div>
@@ -1613,10 +1621,26 @@
             });
         });
 
+        const surpriseAffirmations = [
+            "You have a way of making ordinary days feel lighter.",
+            "I hope you know how much warmth you bring into the space around you.",
+            "There is something quietly beautiful about the way you are.",
+            "You make the world feel a little gentler just by being in it.",
+            "Some people leave a soft kind of warmth behind, and you are one of them.",
+            "I’m glad you’re here, and I hope you feel that.",
+        ];
+
+        function getRandomSurpriseAffirmation() {
+            const index = Math.floor(Math.random() * surpriseAffirmations.length);
+            return surpriseAffirmations[index];
+        }
+
         giantHeart.addEventListener('click', () => {
             const rect = giantHeart.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
+            const surpriseMessage = getRandomSurpriseAffirmation();
+            const surpriseEl = document.getElementById('surpriseMessage');
 
             for(let i = 0; i < 100; i++) {
                 flowerExplosions.push(new ExplodingFlower(
@@ -1625,6 +1649,12 @@
                 ));
             }
 
+            if (surpriseEl) {
+                surpriseEl.textContent = surpriseMessage;
+            }
+
+            saveGardenItem('affirmation', surpriseMessage, { source: 'surprise' });
+            affirmationDisplay.textContent = surpriseMessage;
             finalNoteCard.classList.add('revealed');
             setTimeout(() => {
                 finalNoteCard.scrollIntoView({ behavior: 'smooth', block: 'end' });
