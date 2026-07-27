@@ -4,74 +4,386 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Heart Garden</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Baloo+2:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: "Trebuchet MS", "Gill Sans", sans-serif;
-      background: linear-gradient(135deg, #fff8fc 0%, #ffe4ef 42%, #ffd3e5 100%);
+      font-family: "Baloo 2", "Trebuchet MS", "Gill Sans", sans-serif;
       color: #5b2a4a;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #fff8fc 0%, #ffe4ef 42%, #ffd3e5 100%);
+      overflow-x: hidden;
+    }
+
+    #particleCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .page-shell {
+      position: relative;
+      z-index: 2;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 28px;
     }
 
     .card {
-      max-width: 720px;
-      width: 100%;
-      background: rgba(255, 255, 255, 0.84);
+      width: min(860px, 100%);
+      background: rgba(255, 255, 255, 0.86);
       border: 1px solid rgba(255, 143, 163, 0.25);
       border-radius: 30px;
       padding: 32px;
-      box-shadow: 0 18px 45px rgba(255, 143, 163, 0.14);
+      box-shadow: 0 20px 50px rgba(255, 143, 163, 0.16);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
 
     h1 {
-      margin-top: 0;
+      margin: 0;
       color: #ff5d8f;
       font-family: "Pacifico", cursive;
+      font-size: 2rem;
     }
 
-    .note {
-      margin-bottom: 18px;
+    .subtle {
+      color: #a85d78;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .input-shell {
+      flex: 1 1 260px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
       padding: 12px 14px;
-      border-radius: 16px;
+      border: 1px solid rgba(255, 143, 163, 0.24);
+      border-radius: 999px;
+      background: rgba(255, 248, 251, 0.9);
+      color: #6d3f54;
+      font: inherit;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: rgba(255, 143, 163, 0.5);
+      box-shadow: 0 0 0 3px rgba(255, 143, 163, 0.14);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff8fb1 0%, #ff5d8f 100%);
+      color: white;
+      box-shadow: 0 10px 24px rgba(255, 93, 143, 0.16);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #ff5d8f;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      color: #a85d78;
+      font-size: 0.95rem;
+      flex-wrap: wrap;
+    }
+
+    .month-group {
+      margin-bottom: 20px;
+    }
+
+    .month-group h3 {
+      margin: 0 0 10px;
+      color: #ff5d8f;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .note-card {
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
       background: rgba(255, 240, 246, 0.95);
       border: 1px solid rgba(255, 143, 163, 0.2);
       box-shadow: 0 8px 18px rgba(255, 143, 163, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    a {
-      color: #ff5d8f;
+    .note-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(255, 143, 163, 0.14);
+    }
+
+    .note-card.highlight {
+      outline: 2px solid rgba(255, 93, 143, 0.45);
+      box-shadow: 0 0 0 4px rgba(255, 93, 143, 0.14);
+    }
+
+    .note-text {
+      margin: 0 0 8px;
+      line-height: 1.6;
+      color: #5b2a4a;
+      font-size: 0.98rem;
+      white-space: pre-wrap;
+    }
+
+    .note-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      color: #a85d78;
+      font-size: 0.82rem;
+      flex-wrap: wrap;
+    }
+
+    .empty-state {
+      padding: 20px;
+      border: 1px dashed rgba(255, 143, 163, 0.3);
+      border-radius: 16px;
+      text-align: center;
+      color: #a85d78;
+      background: rgba(255, 248, 251, 0.7);
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Heart Garden</h1>
-    <p>These are the affirmations gathered for this garden.</p>
-    <div id="affirmations"></div>
-    <p><a href="index.html">← Back to the main garden</a></p>
+  <canvas id="particleCanvas"></canvas>
+  <div class="page-shell">
+    <div class="card">
+      <div class="header-row">
+        <div>
+          <h1>Heart Garden</h1>
+          <p class="subtle">A calm place for affirmations, memories, and the kind of words that deserve to linger.</p>
+        </div>
+        <a class="back-link" href="index.html">← Back to the garden</a>
+      </div>
+
+      <div class="toolbar">
+        <div class="input-shell">
+          <input id="searchInput" class="search-input" type="search" placeholder="Search notes by text or month..." />
+        </div>
+        <button id="surpriseButton" class="btn btn-primary">🎲 Surprise me</button>
+      </div>
+
+      <div class="status-row">
+        <span id="resultsSummary">Loading affirmations…</span>
+      </div>
+
+      <div id="affirmations"></div>
+    </div>
   </div>
 
   <script>
-    async function loadAffirmations() {
-      const res = await fetch('/api/garden', { cache: 'no-store' });
-      if (!res.ok) throw new Error('bad-status');
-      const data = await res.json();
-      const items = Array.isArray(data.garden) ? data.garden : [];
-      const affirmations = items.filter(item => item.type === 'affirmation');
-      const container = document.getElementById('affirmations');
-      container.innerHTML = affirmations.length
-        ? affirmations.map(item => `<div class="note">${item.text}</div>`).join('')
-        : '<p>No affirmations yet.</p>';
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    const searchInput = document.getElementById('searchInput');
+    const surpriseButton = document.getElementById('surpriseButton');
+    const resultsSummary = document.getElementById('resultsSummary');
+    const container = document.getElementById('affirmations');
+
+    let particles = [];
+    let affirmations = [];
+
+    function resizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * ratio;
+      canvas.height = window.innerHeight * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      particles = Array.from({ length: 48 }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        size: Math.random() * 10 + 8,
+        speedX: (Math.random() - 0.5) * 0.45,
+        speedY: -0.5 - Math.random() * 0.4,
+        opacity: 0.4 + Math.random() * 0.45,
+        sway: Math.random() * 0.02 + 0.01,
+        phase: Math.random() * Math.PI * 2
+      }));
     }
 
-    loadAffirmations().catch(err => {
-      console.error(err);
-      document.getElementById('affirmations').innerHTML = '<p>Unable to load affirmations right now.</p>';
-    });
+    function drawCanvas() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      for (const p of particles) {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.phase += p.sway;
+        if (p.y < -30) {
+          p.y = window.innerHeight + 30;
+          p.x = Math.random() * window.innerWidth;
+        }
+        if (p.x < -30) p.x = window.innerWidth + 30;
+        if (p.x > window.innerWidth + 30) p.x = -30;
+
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(Math.sin(p.phase) * 0.1);
+        ctx.beginPath();
+        ctx.moveTo(0, -p.size * 0.8);
+        ctx.bezierCurveTo(-p.size * 0.42, -p.size * 0.28, -p.size * 0.28, p.size * 0.3, 0, p.size * 0.8);
+        ctx.bezierCurveTo(p.size * 0.28, p.size * 0.3, p.size * 0.42, -p.size * 0.28, 0, -p.size * 0.8);
+        ctx.fillStyle = '#ff8fb1';
+        ctx.fill();
+        ctx.restore();
+      }
+      requestAnimationFrame(drawCanvas);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function monthKey(item) {
+      const raw = item?.ts ?? item?.date ?? null;
+      const date = typeof raw === 'number' ? new Date(raw) : new Date(raw);
+      if (Number.isNaN(date.getTime())) {
+        return 'Earlier notes';
+      }
+      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    function renderAffirmations() {
+      const query = searchInput.value.trim().toLowerCase();
+      const matches = affirmations.filter((item) => {
+        const haystack = [item.text, item.date, monthKey(item)].filter(Boolean).join(' ').toLowerCase();
+        return !query || haystack.includes(query);
+      });
+
+      container.innerHTML = '';
+      if (!matches.length) {
+        container.innerHTML = '<div class="empty-state">No notes matched that search yet. Try another word or clear the field.</div>';
+        resultsSummary.textContent = 'No visible notes right now.';
+        return;
+      }
+
+      const groups = new Map();
+      matches.forEach((item) => {
+        const key = monthKey(item);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(item);
+      });
+
+      const fragment = document.createDocumentFragment();
+      groups.forEach((items, key) => {
+        const section = document.createElement('section');
+        section.className = 'month-group';
+
+        const heading = document.createElement('h3');
+        heading.textContent = key;
+        section.appendChild(heading);
+
+        items.forEach((item) => {
+          const card = document.createElement('article');
+          card.className = 'note-card';
+          card.innerHTML = `
+            <p class="note-text">${escapeHtml(item.text)}</p>
+            <div class="note-meta">
+              <span>${escapeHtml(item.date || 'A recent note')}</span>
+              <span>affirmation</span>
+            </div>
+          `;
+          section.appendChild(card);
+        });
+
+        fragment.appendChild(section);
+      });
+
+      container.appendChild(fragment);
+      resultsSummary.textContent = `${matches.length} visible note${matches.length === 1 ? '' : 's'} • ${groups.size} month${groups.size === 1 ? '' : 's'}`;
+    }
+
+    function highlightRandomNote() {
+      const visibleCards = Array.from(container.querySelectorAll('.note-card'));
+      if (!visibleCards.length) return;
+      const randomCard = visibleCards[Math.floor(Math.random() * visibleCards.length)];
+      randomCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      randomCard.classList.remove('highlight');
+      void randomCard.offsetWidth;
+      randomCard.classList.add('highlight');
+      window.setTimeout(() => randomCard.classList.remove('highlight'), 1800);
+    }
+
+    async function loadAffirmations() {
+      try {
+        const res = await fetch('/api/garden', { cache: 'no-store' });
+        if (!res.ok) throw new Error('bad-status');
+        const data = await res.json();
+        affirmations = Array.isArray(data.garden) ? data.garden.filter((item) => item.type === 'affirmation') : [];
+        renderAffirmations();
+      } catch (error) {
+        console.error(error);
+        container.innerHTML = '<div class="empty-state">Unable to load affirmations right now. Please try again shortly.</div>';
+        resultsSummary.textContent = 'Unable to load the garden right now.';
+      }
+    }
+
+    searchInput.addEventListener('input', renderAffirmations);
+    surpriseButton.addEventListener('click', highlightRandomNote);
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    drawCanvas();
+    loadAffirmations();
   </script>
 </body>
 </html>
